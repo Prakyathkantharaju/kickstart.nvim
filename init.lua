@@ -37,7 +37,6 @@ I hope you enjoy your Neovim journey,
 
 P.S. You can delete this when you're done too. It's your config now :)
 --]]
-
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
@@ -244,6 +243,17 @@ require('lazy').setup({
       },
     },
   },
+  {
+      "zbirenbaum/copilot.lua",
+      cmd = "Copilot",
+      event = "InsertEnter",
+  },
+  {
+      "zbirenbaum/copilot-cmp",
+      config = function()
+          require("copilot_cmp").setup()
+      end,
+  },
 
   {
     -- Highlight, edit, and navigate code
@@ -253,6 +263,38 @@ require('lazy').setup({
     },
     build = ':TSUpdate',
   },
+  {
+  "debugloop/telescope-undo.nvim",
+  dependencies = { -- note how they're inverted to above example
+    {
+      "nvim-telescope/telescope.nvim",
+      dependencies = { "nvim-lua/plenary.nvim" },
+    },
+  },
+  keys = {
+    { -- lazy style key map
+      "<leader>u",
+      "<cmd>Telescope undo<cr>",
+      desc = "undo history",
+    },
+  },
+  opts = {
+    -- don't use `defaults = { }` here, do this in the main telescope spec
+    extensions = {
+      undo = {
+        -- telescope-undo.nvim config, see below
+      },
+      -- no other extensions here, they can have their own spec too
+    },
+  },
+  config = function(_, opts)
+    -- Calling telescope's setup from multiple specs does not hurt, it will happily merge the
+    -- configs for us. We won't use data, as everything is in it's own namespace (telescope
+    -- defaults, as well as each extension).
+    require("telescope").setup(opts)
+    require("telescope").load_extension("undo")
+  end,
+},
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -651,11 +693,15 @@ cmp.setup {
     end, { 'i', 's' }),
   },
   sources = {
+    { name = 'copilot'},
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
     { name = 'path' },
   },
 }
+
+require("custom.plugins.copilot")
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
